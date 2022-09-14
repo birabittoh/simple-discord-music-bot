@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits, ActivityType, PresenceUpdateStatus, Presence } = require('discord.js');
-const { token } = require('./config.json');
+const { token } = require(path.join(process.cwd(), 'config.json'));
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
 
@@ -15,10 +15,6 @@ for (const file of commandFiles) {
 	client.commands.set(command.data.name, command);
 }
 
-function getRandomInt(max) { // not inclusive
-	return Math.floor(Math.random() * (max));
-  }
-
 const activities = [
 	{ activity: ActivityType.Watching, subject: 'i cantieri'}, // sta guardando i cantieri
 	{ activity: ActivityType.Playing, subject: 'briscola'}, // sta giocando a briscola
@@ -30,7 +26,8 @@ const activities = [
 ]
 
 client.once('ready', () => {
-	choice = activities[getRandomInt(activities.length)]
+	const random = Math.floor(Math.random() * (activities.length));
+	const choice = activities[random]
 	
 	client.user.setActivity(choice.subject, { type: choice.activity })
 	console.log('Bot online!');

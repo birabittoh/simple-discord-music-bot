@@ -1,7 +1,8 @@
+const path = require('node:path');
 const { SlashCommandBuilder } = require('discord.js');
 const { createAudioResource, createAudioPlayer, NoSubscriberBehavior, joinVoiceChannel, AudioPlayerStatus } = require('@discordjs/voice');
 
-const OUTRO_PATH = 'resources/outro.mp3';
+const OUTRO_PATH = path.join(process.cwd(), 'resources', 'outro.mp3');
 
 function get_player(resource) {
 
