@@ -22,6 +22,7 @@ const activities = [
 
 	{ activity: ActivityType.Watching, subject: 'i bambini' },
 	{ activity: ActivityType.Playing, subject: 'quel gioco là non mi viene il titolo' },
+	{ activity: ActivityType.Playing, subject: 'mosca cieca in autostrada' },
 	{ activity: ActivityType.Competing, subject: 'cacata ranked al cesso pubblico' },
 ];
 
@@ -48,5 +49,8 @@ client.on('interactionCreate', async interaction => {
 		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 	}
 });
+
+if (!token)
+	throw 'Check your config.json!';
 
 client.login(token);

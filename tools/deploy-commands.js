@@ -4,6 +4,9 @@ const { Routes } = require('discord.js');
 const { REST } = require('@discordjs/rest');
 const { clientId, token } = require(path.join(process.cwd(), 'config.json'));
 
+if (!(clientId && token))
+	throw 'Check your config.json!';
+
 const commands = new Array();
 const commandsPath = path.join(process.cwd(), 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
