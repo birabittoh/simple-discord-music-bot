@@ -12,6 +12,24 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/index.js"
-        }
+        },
+        {
+            "name": "Deploy commands",
+            "program": "${workspaceFolder}/tools/deploy-commands.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
+            "name": "Delete commands",
+            "program": "${workspaceFolder}/tools/delete-commands.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
     ]
 }
