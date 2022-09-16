@@ -3,9 +3,10 @@ const { SlashCommandBuilder } = require('discord.js');
 const { createAudioResource, createAudioPlayer, joinVoiceChannel, NoSubscriberBehavior, AudioPlayerStatus } = require('@discordjs/voice');
 
 const outros = [
-	{ name: 'Random!', 					value: 'random' },
-	{ name: 'TheFatRat - Xenogenesis', 	value: 'thefatrat_xenogenesis.mp3' },
-	{ name: 'OMFG - Hello', 			value: 'omfg_hello.mp3' },
+	{ name: 'Random!', 							value: 'random' },
+	{ name: 'TheFatRat - Xenogenesis', 			value: 'thefatrat_xenogenesis.mp3' },
+	{ name: 'OMFG - Hello', 					value: 'omfg_hello.mp3' },
+	{ name: 'Pegboard Nerds - Disconnected',	value: 'pegboard_nerds_disconnected.mp3' },
 ];
 
 function get_player(resource, user_connection) {
