@@ -10,16 +10,15 @@ const outros = [
 	{ name: 'Gym Class Heroes - Stereo Hearts',	value: 'gym_class_heroes_stereo_hearts.mp3' },
 ];
 
+async function reply_efemeral(interaction, reply) { return await interaction.reply({ content: reply, ephemeral: true }); }
+
 function get_player(resource) {
 
 	const player = createAudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Pause } });
-
 	player.on('error', error => console.error(`Error: ${error.message} with resource ${error.resource.metadata.title}`));
 	player.on(AudioPlayerStatus.Idle, () => {
 		player.stop();
-		player.subscribers.forEach(element => {
-			element.connection.disconnect();
-		});
+		player.subscribers.forEach(element => element.connection.disconnect());
 	});
 
 	player.play(createAudioResource(resource));
@@ -34,29 +33,40 @@ module.exports = {
 			option.setName('which')
 				.setDescription('Select which outro to play')
 				.setRequired(false)
-				.addChoices(...outros)),
+				.addChoices(...outros))
+		.addStringOption(option =>
+			option.setName('kick')
+				.setDescription('Do you actually want to log off?')
+				.setRequired(false)
+				.addChoices({ name: 'Yes', value: 'true' }, { name: 'No', value: 'false' })),
 
 	async execute(interaction) {
 		const member = interaction.member;
-		if (!member) return await interaction.reply({ content: 'Please use this in your current server.', ephemeral: true });
+		if (!member) return await reply_efemeral(interaction, 'Please use this in your current server.');
 
 		const user_connection = member.voice;
 		const channel = user_connection.channel;
-		if (!channel) return await interaction.reply({ content: 'You\'re not in a voice channel.', ephemeral: true });
+		if (!channel) return await reply_efemeral(interaction, 'You\'re not in a voice channel.');
 
 		const guild = channel.guild;
 		const bot_connection = joinVoiceChannel({ channelId: channel.id, guildId: guild.id, adapterCreator: guild.voiceAdapterCreator });
 
 		const outro = interaction.options.getString('which');
+		const kick = interaction.options.getString('kick');
+
 		let outro_file = outro ? outro : 'random';
 		if (outro_file == 'random')
 			outro_file = outros[Math.floor(Math.random() * (outros.length - 1)) + 1].value;
 
 		const song_path = path.join(process.cwd(), 'resources', outro_file);
-		bot_connection.subscribe(get_player(song_path));
-		setTimeout(() => user_connection.disconnect(), 20_000);
-
 		const outro_title = outros.find(element => element.value == outro_file).name;
-		return await interaction.reply({ content: `Prepare for takeoff with ${outro_title}!`, ephemeral: true });
+		bot_connection.subscribe(get_player(song_path));
+
+		const kick_switch = kick ? kick : 'true';
+		if (kick_switch == 'true') {
+			setTimeout(() => user_connection.disconnect(), 20_000);
+			return await reply_efemeral(interaction, `Prepare for takeoff with ${outro_title}!`);
+		}
+		return await reply_efemeral(interaction, `Playing ${outro_title}.`);
 	},
 };
