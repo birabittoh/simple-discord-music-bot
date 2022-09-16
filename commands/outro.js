@@ -7,9 +7,10 @@ const outros = [
 	{ name: 'TheFatRat - Xenogenesis', 			value: 'thefatrat_xenogenesis.mp3' },
 	{ name: 'OMFG - Hello', 					value: 'omfg_hello.mp3' },
 	{ name: 'Pegboard Nerds - Disconnected',	value: 'pegboard_nerds_disconnected.mp3' },
+	{ name: 'Gym Class Heroes - Stereo Hearts',	value: 'gym_class_heroes_stereo_hearts.mp3' },
 ];
 
-function get_player(resource, user_connection) {
+function get_player(resource) {
 
 	const player = createAudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Pause } });
 
@@ -20,7 +21,6 @@ function get_player(resource, user_connection) {
 			element.connection.disconnect();
 		});
 	});
-	player.on(AudioPlayerStatus.Playing, () => setTimeout(() => user_connection.disconnect(), 20_000));
 
 	player.play(createAudioResource(resource));
 	return player;
@@ -31,7 +31,7 @@ module.exports = {
 		.setName('outro')
 		.setDescription('Leave with an outro.')
 		.addStringOption(option =>
-			option.setName('outro')
+			option.setName('which')
 				.setDescription('Select which outro to play')
 				.setRequired(false)
 				.addChoices(...outros)),
@@ -47,13 +47,14 @@ module.exports = {
 		const guild = channel.guild;
 		const bot_connection = joinVoiceChannel({ channelId: channel.id, guildId: guild.id, adapterCreator: guild.voiceAdapterCreator });
 
-		const outro = interaction.options.getString('outro');
+		const outro = interaction.options.getString('which');
 		let outro_file = outro ? outro : 'random';
 		if (outro_file == 'random')
 			outro_file = outros[Math.floor(Math.random() * (outros.length - 1)) + 1].value;
 
 		const song_path = path.join(process.cwd(), 'resources', outro_file);
-		bot_connection.subscribe(get_player(song_path, user_connection));
+		bot_connection.subscribe(get_player(song_path));
+		setTimeout(() => user_connection.disconnect(), 20_000);
 
 		const outro_title = outros.find(element => element.value == outro_file).name;
 		return await interaction.reply({ content: `Prepare for takeoff with ${outro_title}!`, ephemeral: true });
