@@ -8,37 +8,15 @@ const {
   AudioPlayerStatus,
 } = require("@discordjs/voice");
 
-const ytdl = require("ytdl-core");
-const ytsr = require("ytsr");
+const play = require('play-dl')
 
-async function reply_efemeral(interaction, reply) {
-  return await interaction.reply({ content: reply, ephemeral: true });
-}
-
-function get_player(resource) {
-  const player = createAudioPlayer({
-    behaviors: { noSubscriber: NoSubscriberBehavior.Pause },
-  });
-  player.on("error", (error) =>
-    console.error(
-      `Error: ${error.message} with resource ${error.resource.metadata.title}`
-    )
-  );
-  player.on(AudioPlayerStatus.Idle, () => {
-    player.stop();
-    player.subscribers.forEach((element) => element.connection.disconnect());
-  });
-
-  player.play(createAudioResource(resource));
-  return player;
-}
+//const reg = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/;
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("play")
     .setDescription("Play something off YouTube.")
-    .addStringOption((option) =>
-      option
+    .addStringOption((option) => option
         .setName("query")
         .setDescription("YouTube URL or search query")
         .setRequired(true)
@@ -47,57 +25,39 @@ module.exports = {
   async execute(interaction) {
     const member = interaction.member;
     if (!member)
-      return await reply_efemeral(
-        interaction,
-        "Please use this in your current server."
-      );
+      return await interaction.reply({ content: "Please use this in your current server.", ephemeral: true });
 
     const user_connection = member.voice;
     const channel = user_connection.channel;
-    if (!channel)
-      return await reply_efemeral(
-        interaction,
-        "You're not in a voice channel."
-      );
 
+    if (!channel)
+      return await interaction.reply({ content: "You're not in a voice channel.", ephemeral: true });
+
+    await interaction.deferReply();
     const guild = channel.guild;
 
     // Get the YouTube URL or search query
-    const url = interaction.options.getString("query");
+    let url = interaction.options.getString("query");
 
-    // If the URL is not a valid YouTube URL, treat it as a search query and try to get the first result
+    let video;
+    switch (play.yt_validate(url)) {
+      case "video":
+        video = {url: url};
+        break;
+      
+      case "search":
+        yt_info = await play.search(url, { source : { youtube : "video" }, limit: 1 });
 
-    if (!ytdl.validateURL(url)) {
-        return await reply_efemeral(interaction, "This bot only supports URLs (for now).");
-      try {
-        const searchResults = await ytsr(url);
-        results = searchResults.items;
+        if(yt_info.length === 0)
+          return await interaction.editReply(`No results found.`);
 
-        url = null
-        for(result in results){
-            if (result.type == "video"){
-                url = result.url;
-                console.log("Using", url)
-                break;
-            }
-        }
-        if(url == null) {
-            console.log("No results found");
-            throw new Error("No results found");
-        }
-      } catch (error) {
-        return await reply_efemeral(
-          interaction,
-          `Invalid YouTube URL or search query! ${error}`
-        );
-      }
+        video = yt_info[0];
+        break;
+    
+      default:
+        return await interaction.editReply(`Not supported.`);
     }
-
-    const stream = ytdl(url, {
-      filter: "audioonly",
-      opusEncoded: true,
-      encoderArgs: ["-af", "bass=g=10,dynaudnorm=f=200"],
-    });
+    let stream = await play.stream(video.url);
 
     // Connect to the user's voice channel
     const connection = joinVoiceChannel({
@@ -106,7 +66,21 @@ module.exports = {
       adapterCreator: guild.voiceAdapterCreator,
     });
 
-    connection.subscribe(get_player(stream));
-    return await reply_efemeral(interaction, `Playing.`);
+    let resource = createAudioResource(stream.stream, {
+      inputType: stream.type
+    })
+
+    player = createAudioPlayer({
+      behaviors: { noSubscriber: NoSubscriberBehavior.Play }
+    });
+
+    player.on(AudioPlayerStatus.Idle, () => {
+      player.stop();
+      player.subscribers.forEach((element) => element.connection.disconnect());
+    });
+
+    player.play(resource);
+    connection.subscribe(player);
+    return await interaction.editReply(`Playing ${video.url}`);
   },
 };
