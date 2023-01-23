@@ -9,7 +9,7 @@ client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
-var player;
+let player;
 
 for (const file of commandFiles) {
 	const filePath = path.join(commandsPath, file);
@@ -31,7 +31,6 @@ const activities = [
 client.once('ready', () => {
 	const random = Math.floor(Math.random() * (activities.length));
 	const choice = activities[random];
-
 	client.user.setActivity(choice.subject, { type: choice.activity });
 	console.log('Bot online!');
 });

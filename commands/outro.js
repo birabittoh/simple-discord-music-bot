@@ -1,29 +1,13 @@
-const path = require('node:path');
 const { SlashCommandBuilder } = require('discord.js');
-const { createAudioResource, createAudioPlayer, joinVoiceChannel, NoSubscriberBehavior, AudioPlayerStatus } = require('@discordjs/voice');
+const { playUrl, getChannel } = require("../functions/music");
 
 const outros = [
 	{ name: 'Random!', 							value: 'random' },
-	{ name: 'TheFatRat - Xenogenesis', 			value: 'thefatrat_xenogenesis.mp3' },
-	{ name: 'OMFG - Hello', 					value: 'omfg_hello.mp3' },
-	{ name: 'Pegboard Nerds - Disconnected',	value: 'pegboard_nerds_disconnected.mp3' },
-	{ name: 'Gym Class Heroes - Stereo Hearts',	value: 'gym_class_heroes_stereo_hearts.mp3' },
+	{ name: 'TheFatRat - Xenogenesis', 			value: 'https://www.youtube.com/watch?v=6N8zvi1VNSc' },
+	{ name: 'OMFG - Hello', 					value: 'https://www.youtube.com/watch?v=5nYVNTX0Ib8' },
+	{ name: 'Pegboard Nerds - Disconnected',	value: 'https://www.youtube.com/watch?v=YdBtx8qG68w' },
+	{ name: 'Gym Class Heroes - Stereo Hearts',	value: 'https://www.youtube.com/watch?v=ThctmvQ3NGk' },
 ];
-
-async function reply_efemeral(interaction, reply) { return await interaction.reply({ content: reply, ephemeral: true }); }
-
-function get_player(resource) {
-
-	const player = createAudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Pause } });
-	player.on('error', error => console.error(`Error: ${error.message} with resource ${error.resource.metadata.title}`));
-	player.on(AudioPlayerStatus.Idle, () => {
-		player.stop();
-		player.subscribers.forEach(element => element.connection.disconnect());
-	});
-
-	player.play(createAudioResource(resource));
-	return player;
-}
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -41,15 +25,10 @@ module.exports = {
 				.addChoices({ name: 'Yes', value: 'true' }, { name: 'No', value: 'false' })),
 
 	async execute(interaction) {
-		const member = interaction.member;
-		if (!member) return await reply_efemeral(interaction, 'Please use this in your current server.');
-
-		const user_connection = member.voice;
-		const channel = user_connection.channel;
-		if (!channel) return await reply_efemeral(interaction, 'You\'re not in a voice channel.');
-
-		const guild = channel.guild;
-		const bot_connection = joinVoiceChannel({ channelId: channel.id, guildId: guild.id, adapterCreator: guild.voiceAdapterCreator });
+		
+		channel = await getChannel(interaction);
+		if (typeof channel == "string")
+      		return await interaction.reply({ content: channel, ephemeral: true });
 
 		const outro = interaction.options.getString('which');
 		const kick = interaction.options.getString('kick');
@@ -58,15 +37,13 @@ module.exports = {
 		if (outro_file == 'random')
 			outro_file = outros[Math.floor(Math.random() * (outros.length - 1)) + 1].value;
 
-		const song_path = path.join(process.cwd(), 'resources', outro_file);
-		const outro_title = outros.find(element => element.value == outro_file).name;
-		bot_connection.subscribe(get_player(song_path));
+		await playUrl(outro_file, channel);
 
 		const kick_switch = kick ? kick : 'true';
 		if (kick_switch == 'true') {
-			setTimeout(() => user_connection.disconnect(), 20_000);
-			return await reply_efemeral(interaction, `Prepare for takeoff with ${outro_title}!`);
+			setTimeout(() => interaction.member.voice.disconnect(), 20_000);
+			return await interaction.reply({ content: `Prepare for takeoff!`, ephemeral: true });
 		}
-		return await reply_efemeral(interaction, `Playing ${outro_title}.`);
+		return await interaction.reply({ content: `Playing outro.`, ephemeral: true });
 	},
 };
