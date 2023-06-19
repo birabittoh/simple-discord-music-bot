@@ -28,6 +28,25 @@ module.exports = {
         player.play(createAudioResource(stream.stream, { inputType: stream.type }));
         connection.subscribe(player);
     },
+    async playStream(url, channel) {
+        if (!channel) {
+            console.log('Channel error:', channel);
+            return;
+        }
+        const guild = channel.guild;
+        const connection = joinVoiceChannel({
+            channelId: channel.id,
+            guildId: guild.id,
+            adapterCreator: guild.voiceAdapterCreator,
+        });
+        player = createAudioPlayer();
+        player.on(AudioPlayerStatus.Idle, () => {
+            player.subscribers.forEach((element) => element.connection.disconnect());
+        });
+
+        player.play(createAudioResource(url, { inputType: 'mp3' })); // 'opus', 'mp3'
+        connection.subscribe(player);
+    },
     async getChannel(interaction) {
         const member = interaction.member;
         if (!member)
