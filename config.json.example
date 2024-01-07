@@ -1,4 +1,18 @@
 {
     "applicationId": "your-client-id-here",
-    "token": "your-token-here"
+    "token": "your-token-here",
+    "outros":
+    [
+        { "name": "TheFatRat - Xenogenesis", "value": "https://www.youtube.com/watch?v=6N8zvi1VNSc" },
+        { "name": "OMFG - Hello", "value": "https://www.youtube.com/watch?v=5nYVNTX0Ib8" },
+        { "name": "Pegboard Nerds - Disconnected", "value": "https://www.youtube.com/watch?v=YdBtx8qG68w" },
+        { "name": "Gym Class Heroes - Stereo Hearts", "value": "https://www.youtube.com/watch?v=ThctmvQ3NGk" }
+    ],
+    "radios":
+    [
+        { "name": "EusariRadio", "value": "https://onair7.xdevel.com/proxy/xautocloud_cnou_1049?mp=/;stream/" },
+        { "name": "Radio 24", "value": "https://shoutcast3.radio24.ilsole24ore.com/stream.mp3" },
+        { "name": "Radio Delfino", "value": "https://nr8.newradio.it/proxy/emaamo00?mp=/stream?ext=.mp3" },
+        { "name": "Radio 105", "value": "https://icy.unitedradio.it/Radio105.mp3" }
+    ]
 }

@@ -1,13 +1,13 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { playUrl, getChannel } = require('../functions/music');
+const path = require('node:path');
+const { outros } = require(path.join(process.cwd(), 'config.json'));
 
-const outros = [
-    { name: 'Random!', value: 'random' },
-    { name: 'TheFatRat - Xenogenesis', value: 'https://www.youtube.com/watch?v=6N8zvi1VNSc' },
-    { name: 'OMFG - Hello', value: 'https://www.youtube.com/watch?v=5nYVNTX0Ib8' },
-    { name: 'Pegboard Nerds - Disconnected', value: 'https://www.youtube.com/watch?v=YdBtx8qG68w' },
-    { name: 'Gym Class Heroes - Stereo Hearts', value: 'https://www.youtube.com/watch?v=ThctmvQ3NGk' },
-];
+function getOutroUrl(outro) {
+    if (outro) return outro;
+    const randomIndex = Math.floor(Math.random() * (outros.length));
+    return outros[randomIndex].value;
+}
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -22,7 +22,7 @@ module.exports = {
             option.setName('kick')
                 .setDescription('Do you actually want to log off?')
                 .setRequired(false)
-                .addChoices({ name: 'Yes', value: 'true' }, { name: 'No', value: 'false' })),
+                .addChoices({ name: 'Yes', value: 'true', default: 'true' }, { name: 'No', value: 'false' })),
 
     async execute(interaction) {
         const channel = await getChannel(interaction);
@@ -31,9 +31,8 @@ module.exports = {
 
         const outro = interaction.options.getString('which');
         const kick = interaction.options.getString('kick');
-        const randomIndex = Math.floor(Math.random() * (outros.length - 1)) + 1;
-        const outro_file = outro ? outro : outros[randomIndex].value;
-        await playUrl(outro_file, channel);
+        const outroUrl = getOutroUrl(outro);
+        await playUrl(outroUrl, channel);
 
         const kick_switch = kick ? kick : 'true';
         if (kick_switch == 'true') {

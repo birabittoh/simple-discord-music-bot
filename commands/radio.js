@@ -1,14 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { playStream, getChannel } = require('../functions/music');
-
-// const reg = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/;
-
-const radios = [
-    { name: 'EusariRadio', value: 'https://onair7.xdevel.com/proxy/xautocloud_cnou_1049?mp=/;stream/' },
-    { name: 'Radio 24', value: 'https://shoutcast3.radio24.ilsole24ore.com/stream.mp3' },
-    { name: 'Radio Delfino', value: 'https://nr8.newradio.it/proxy/emaamo00?mp=/stream?ext=.mp3' },
-    { name: 'Radio 105', value: 'https://icy.unitedradio.it/Radio105.mp3' },
-];
+const path = require('node:path');
+const { radios } = require(path.join(process.cwd(), 'config.json'));
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -27,7 +20,6 @@ module.exports = {
 
         await interaction.deferReply();
 
-        // Get the YouTube URL or search query
         const radio = interaction.options.getString('which');
         const streamUrl = radio ? radio : radios[0].value;
 
