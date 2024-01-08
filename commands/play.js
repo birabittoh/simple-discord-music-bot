@@ -1,8 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const play = require('play-dl');
-const { playUrl, getChannel } = require('../functions/music');
-
-// const reg = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/;
+const { playUrls, getChannel } = require('../functions/music');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -20,15 +18,13 @@ module.exports = {
             return await interaction.reply({ content: channel, ephemeral: true });
 
         await interaction.deferReply();
-
-        // Get the YouTube URL or search query
         const url = interaction.options.getString('query');
 
         let video, yt_info;
         switch (play.yt_validate(url)) {
             case 'video':
-                video = { url: url };
-                break;
+                playUrls([url], channel);
+                return await interaction.editReply(`Added ${url} to queue.`);
 
             case 'search':
                 yt_info = await play.search(url, { source: { youtube: 'video' }, limit: 1 });
@@ -37,12 +33,20 @@ module.exports = {
                     return await interaction.editReply('No results found.');
 
                 video = yt_info[0];
-                break;
+                playUrls([video.url], channel);
+                return await interaction.editReply(`Added ${video.url} to queue.`);
 
+            case 'playlist':
+                const playlist = await play.playlist_info(url, { incomplete : true });
+                const videos = await playlist.all_videos();
+                const urls = videos.map((e) => e.url);
+                result = await playUrls(urls, channel);
+                if (result)
+                    return await interaction.editReply(`Added ${urls.length} videos from the following playlist: ${playlist.title}.`);
+                else
+                    return await interaction.editReply(`Could not add playlist.`);
             default:
                 return await interaction.editReply('Not supported.');
         }
-        playUrl(video.url, channel);
-        return await interaction.editReply(`Playing ${video.url}`);
     },
 };

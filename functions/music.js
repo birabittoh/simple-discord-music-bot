@@ -1,51 +1,47 @@
 const {
     createAudioResource,
-    createAudioPlayer,
     joinVoiceChannel,
     AudioPlayerStatus,
 } = require('@discordjs/voice');
 const play = require('play-dl');
+const { MyQueue } = require('./myqueue')
+
+const q = new MyQueue();
+
+function getChannelConnection(channel) {
+    const guild = channel.guild;
+    return joinVoiceChannel({
+        channelId: channel.id,
+        guildId: guild.id,
+        adapterCreator: guild.voiceAdapterCreator
+    })
+}
 
 module.exports = {
-    async playUrl(url, channel) {
+    async playUrls(urls, channel) {
         if (!channel) {
             console.log('Channel error:', channel);
             return;
         }
-        const stream = await play.stream(url);
-        const guild = channel.guild;
-        const connection = joinVoiceChannel({
-            channelId: channel.id,
-            guildId: guild.id,
-            adapterCreator: guild.voiceAdapterCreator,
-        });
 
-        player = createAudioPlayer();
-        player.on(AudioPlayerStatus.Idle, () => {
-            player.subscribers.forEach((element) => element.connection.disconnect());
-        });
-
-        player.play(createAudioResource(stream.stream, { inputType: stream.type }));
-        connection.subscribe(player);
+        q.connection = getChannelConnection(channel);
+        return q.addArray(urls);
     },
     async playStream(url, channel) {
         if (!channel) {
             console.log('Channel error:', channel);
             return;
         }
-        const guild = channel.guild;
-        const connection = joinVoiceChannel({
-            channelId: channel.id,
-            guildId: guild.id,
-            adapterCreator: guild.voiceAdapterCreator,
-        });
-        player = createAudioPlayer();
-        player.on(AudioPlayerStatus.Idle, () => {
-            player.subscribers.forEach((element) => element.connection.disconnect());
-        });
-
-        player.play(createAudioResource(url, { inputType: 'mp3' })); // 'opus', 'mp3'
-        connection.subscribe(player);
+        q.connection = getChannelConnection(channel);
+        q.add(createAudioResource(url, { inputType: 'mp3' }));
+    },
+    async playOutro(url, channel) {
+        if (!channel) {
+            console.log('Channel error:', channel);
+            return;
+        }
+        q.connection = getChannelConnection(channel);
+        q.outro(url);
     },
     async getChannel(interaction) {
         const member = interaction.member;
@@ -58,4 +54,16 @@ module.exports = {
 
         return channel;
     },
+    async stopMusic() {
+        return q.stop();
+    },
+    async skipMusic() {
+        return q.next();
+    },
+    async getQueue() {
+        return q.queue;
+    },
+    clearQueue() {
+        return q.clear();
+    }
 };

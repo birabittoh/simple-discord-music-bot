@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { playUrl, getChannel } = require('../functions/music');
+const { playOutro, getChannel } = require('../functions/music');
 const path = require('node:path');
 const { outros } = require(path.join(process.cwd(), 'config.json'));
 
@@ -32,10 +32,9 @@ module.exports = {
         const outro = interaction.options.getString('which');
         const kick = interaction.options.getString('kick');
         const outroUrl = getOutroUrl(outro);
-        await playUrl(outroUrl, channel);
+        await playOutro(outroUrl, channel);
 
-        const kick_switch = kick ? kick : 'true';
-        if (kick_switch == 'true') {
+        if (kick !== 'false') {
             setTimeout(() => interaction.member.voice.disconnect(), 20_000);
             return await interaction.reply({ content: 'Prepare for takeoff!', ephemeral: true });
         }
