@@ -1,6 +1,30 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { getChannel, getQueue } = require('../functions/music');
 
+const CHARACTER_LIMIT_API = 2000;
+
+function getReply(result) {
+    const nowPlaying = "Now playing: " + result.shift()
+
+    if (!result.length) {
+        return nowPlaying;
+    }
+
+    let reply = "Queue:"
+    let new_string = "";
+    const characterLimit = CHARACTER_LIMIT_API - nowPlaying.length - 6; // 4 chars for "\n...", 2 chars for "\n\n"
+
+    for (r in result) {
+        new_string = "\n" + (r + 1) + ". <" + result[r] + ">";
+        if (reply.length + new_string.length > characterLimit) {
+            reply += "\n...";
+            break;
+        }
+        reply += new_string;
+    }
+    return reply + "\n\n" + nowPlaying;
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('queue')
@@ -13,12 +37,8 @@ module.exports = {
 
         const result = await getQueue();
         if (result) {
-            let finalReply = "Now playing: " + result.shift() + "\n";
-            
-            for (r in result) {
-                finalReply += "\n" + (r + 1) + ". " + result[r];
-            }
-            return await interaction.reply({ content: finalReply });
+            reply = getReply(result);
+            return await interaction.reply({ content: reply });
         }
         return await interaction.reply({ content: 'Queue is empty.' });
     },
