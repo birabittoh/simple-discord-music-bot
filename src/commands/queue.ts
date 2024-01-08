@@ -1,5 +1,5 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { getChannel, getQueue } = require('../functions/music');
+import { SlashCommandBuilder } from 'discord.js';
+import { getChannel, getQueue } from '../functions/music';
 
 const CHARACTER_LIMIT_API = 2000;
 
@@ -14,7 +14,7 @@ function getReply(result) {
     let new_string = "";
     const characterLimit = CHARACTER_LIMIT_API - nowPlaying.length - 6; // 4 chars for "\n...", 2 chars for "\n\n"
 
-    for (r in result) {
+    for (let r in result) {
         new_string = "\n" + (r + 1) + ". <" + result[r] + ">";
         if (reply.length + new_string.length > characterLimit) {
             reply += "\n...";
@@ -37,7 +37,7 @@ module.exports = {
 
         const result = await getQueue();
         if (result) {
-            reply = getReply(result);
+            const reply = getReply(result);
             return await interaction.reply({ content: reply });
         }
         return await interaction.reply({ content: 'Queue is empty.' });

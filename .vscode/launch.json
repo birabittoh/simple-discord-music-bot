@@ -8,14 +8,13 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}/index.js"
+            "program": "${workspaceFolder}/src/index.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": ["${workspaceFolder}/build/**/*.js"]
         },
         {
             "name": "Deploy commands",
-            "program": "${workspaceFolder}/tools/deploy-commands.js",
+            "program": "${workspaceFolder}/build/tools/deploy-commands.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"
@@ -24,7 +23,7 @@
         },
         {
             "name": "Delete commands",
-            "program": "${workspaceFolder}/tools/delete-commands.js",
+            "program": "${workspaceFolder}/build/tools/delete-commands.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"

@@ -1,6 +1,6 @@
-const { SlashCommandBuilder } = require('discord.js');
-const play = require('play-dl');
-const { playUrls, getChannel } = require('../functions/music');
+import { SlashCommandBuilder } from 'discord.js';
+import play from 'play-dl';
+import { playUrls, getChannel } from '../functions/music';
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -40,7 +40,7 @@ module.exports = {
                 const playlist = await play.playlist_info(url, { incomplete : true });
                 const videos = await playlist.all_videos();
                 const urls = videos.map((e) => e.url);
-                result = await playUrls(urls, channel);
+                const result = await playUrls(urls, channel);
                 if (result)
                     return await interaction.editReply(`Added ${urls.length} videos from the following playlist: ${playlist.title}.`);
                 else

@@ -1,6 +1,6 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { playStream, getChannel } = require('../functions/music');
-const path = require('node:path');
+import { SlashCommandBuilder } from 'discord.js';
+import { playStream, getChannel } from '../functions/music';
+import path from 'node:path';
 const { radios } = require(path.join(process.cwd(), 'config.json'));
 
 module.exports = {

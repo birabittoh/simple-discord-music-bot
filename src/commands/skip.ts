@@ -1,5 +1,5 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { getChannel, skipMusic } = require('../functions/music');
+import { SlashCommandBuilder } from 'discord.js';
+import { getChannel, skipMusic } from '../functions/music';
 
 module.exports = {
     data: new SlashCommandBuilder()

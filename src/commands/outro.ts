@@ -1,6 +1,6 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { playOutro, getChannel } = require('../functions/music');
-const path = require('node:path');
+import { SlashCommandBuilder } from 'discord.js';
+import { playOutro, getChannel } from '../functions/music';
+import path from 'node:path';
 const { outros } = require(path.join(process.cwd(), 'config.json'));
 
 function getOutroUrl(outro) {
@@ -22,7 +22,7 @@ module.exports = {
             option.setName('kick')
                 .setDescription('Do you actually want to log off?')
                 .setRequired(false)
-                .addChoices({ name: 'Yes', value: 'true', default: 'true' }, { name: 'No', value: 'false' })),
+                .addChoices({ name: 'Yes', value: 'true' }, { name: 'No', value: 'false' })),
 
     async execute(interaction) {
         const channel = await getChannel(interaction);

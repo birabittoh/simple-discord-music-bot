@@ -1,18 +1,17 @@
-const {
-    createAudioResource,
-    createAudioPlayer,
-    AudioPlayerStatus
-} = require('@discordjs/voice');
-const play = require('play-dl');
+import { createAudioResource, createAudioPlayer, NoSubscriberBehavior, AudioPlayerStatus, VoiceConnection, AudioPlayer } from '@discordjs/voice';
+import play from 'play-dl';
 
 async function resourceFromUrl(url) {
     const stream = await play.stream(url);
     return createAudioResource(stream.stream, { inputType: stream.type })
 }
 
-class MyQueue {
+export default class MyQueue {
     #nowPlaying = null;
     #queue = Array();
+    connection: VoiceConnection;
+    player: AudioPlayer;
+    static _instance: MyQueue;
     get queue() {
         if (this.#nowPlaying)
             return [this.#nowPlaying].concat(this.#queue);
@@ -28,10 +27,11 @@ class MyQueue {
         this.#nowPlaying = "";
         this.connection = null;
         this.#queue = Array();
-        this.player = createAudioPlayer();
+        this.player = createAudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Stop } });
         this.player.on(AudioPlayerStatus.Idle, () => {
             if (this.#queue.length > 0) 
                 return this.next();
+            //@ts-expect-error
             this.player.subscribers.forEach((e) => e.connection.disconnect());
         });
     }
@@ -89,6 +89,7 @@ class MyQueue {
                 this.resume();
                 return
             }
+            //@ts-expect-error
             p.subscribers.forEach((e) => e.connection.disconnect());
         });
 
@@ -97,4 +98,4 @@ class MyQueue {
     }
 }
 
-module.exports = { MyQueue }
+(module).exports = MyQueue;
