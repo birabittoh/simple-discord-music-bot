@@ -1,14 +1,14 @@
 import { createAudioResource, createAudioPlayer, NoSubscriberBehavior, AudioPlayerStatus, VoiceConnection, AudioPlayer } from '@discordjs/voice';
-import play from 'play-dl';
+import play, { YouTubeVideo } from 'play-dl';
 
-async function resourceFromUrl(url) {
+async function resourceFromYTUrl(url: string) {
     const stream = await play.stream(url);
     return createAudioResource(stream.stream, { inputType: stream.type })
 }
 
 export default class MyQueue {
-    #nowPlaying = null;
-    #queue = Array();
+    #nowPlaying: YouTubeVideo;
+    #queue: Array<YouTubeVideo>;
     connection: VoiceConnection;
     player: AudioPlayer;
     static _instance: MyQueue;
@@ -24,20 +24,19 @@ export default class MyQueue {
         }
         MyQueue._instance = this;
 
-        this.#nowPlaying = "";
+        this.#nowPlaying = null;
         this.connection = null;
-        this.#queue = Array();
+        this.#queue = Array<YouTubeVideo>();
         this.player = createAudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Stop } });
         this.player.on(AudioPlayerStatus.Idle, () => {
             if (this.#queue.length > 0) 
                 return this.next();
-            //@ts-expect-error
-            this.player.subscribers.forEach((e) => e.connection.disconnect());
+            this.connection.disconnect();
         });
     }
 
     clear() {
-        this.#queue = Array();
+        this.#queue = Array<YouTubeVideo>();
     }
 
     stop() {
@@ -51,23 +50,23 @@ export default class MyQueue {
         if (this.#queue.length == 0)
             return this.stop();
         this.#nowPlaying = this.#queue.shift();
-        const resource = await resourceFromUrl(this.#nowPlaying);
+        const resource = await resourceFromYTUrl(this.#nowPlaying.url);
         this.player.play(resource);
         this.connection.subscribe(this.player);
     }
 
-    add(url, position=this.#queue.length) {
+    add(video: YouTubeVideo, position=this.#queue.length) {
         const l = this.#queue.length;
         const normalizedPosition = position % (l + 1);
-        this.#queue.splice(normalizedPosition, 0, url);
+        this.#queue.splice(normalizedPosition, 0, video);
         if (l == 0) this.next();
     }
 
-    async addArray(urls) {
+    async addArray(urls: YouTubeVideo[]) {
         const l = this.#queue.length;
         this.#queue.push(...urls);
         if (l == 0 && this.player.state.status == AudioPlayerStatus.Idle) this.next();
-        return l != this.#queue.length;
+        return urls;
     }
 
     pause() {
@@ -79,9 +78,9 @@ export default class MyQueue {
         this.connection.subscribe(this.player);
     }
 
-    async outro(url) {
+    async outro(url: string) {
         this.player.pause();
-        const resource = await resourceFromUrl(url);
+        const resource = await resourceFromYTUrl(url);
 
         const p = createAudioPlayer();
         p.on(AudioPlayerStatus.Idle, () => {
@@ -89,8 +88,7 @@ export default class MyQueue {
                 this.resume();
                 return
             }
-            //@ts-expect-error
-            p.subscribers.forEach((e) => e.connection.disconnect());
+            this.connection.disconnect();
         });
 
         p.play(resource);

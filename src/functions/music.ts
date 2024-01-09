@@ -1,8 +1,13 @@
-import { createAudioResource, joinVoiceChannel, StreamType } from '@discordjs/voice';
-import { ChatInputCommandInteraction, GuildMember, VoiceBasedChannel } from 'discord.js'
+import { joinVoiceChannel } from '@discordjs/voice';
+import { ChatInputCommandInteraction, VoiceBasedChannel } from 'discord.js'
 import MyQueue from './myqueue';
+import { YouTubeVideo } from 'play-dl';
 
 const q = new MyQueue();
+
+export function formatTitle(video: YouTubeVideo): string {
+    return `**${video.title}** (\`${video.durationRaw}\`)`
+}
 
 export function getChannelConnection(channel: VoiceBasedChannel) {
     const guild = channel.guild;
@@ -13,16 +18,16 @@ export function getChannelConnection(channel: VoiceBasedChannel) {
     });
 }
 
-export async function playUrls(urls: string[], channel: VoiceBasedChannel): Promise<boolean> {
+export async function playUrls(videos: YouTubeVideo[], channel: VoiceBasedChannel): Promise<YouTubeVideo[]> {
     if (!channel) {
         console.log('Channel error:', channel);
         return;
     }
 
     q.connection = getChannelConnection(channel);
-    return await q.addArray(urls);
+    return await q.addArray(videos);
 }
-
+/* Only useful for radio
 export async function playStream(url: string, channel: VoiceBasedChannel) {
     if (!channel) {
         console.log('Channel error:', channel);
@@ -31,6 +36,7 @@ export async function playStream(url: string, channel: VoiceBasedChannel) {
     q.connection = getChannelConnection(channel);
     q.add(createAudioResource(url, { inputType: StreamType.Opus }));
 }
+*/
 
 export async function playOutro(url: string, channel: VoiceBasedChannel) {
     if (!channel) {

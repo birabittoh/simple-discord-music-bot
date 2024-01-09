@@ -1,6 +1,27 @@
-import { BaseInteraction, ChatInputCommandInteraction, CommandInteraction, SlashCommandBuilder } from 'discord.js';
-import play from 'play-dl';
-import { playUrls, getChannel } from '../functions/music';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import play, { YouTubeVideo } from 'play-dl';
+import { playUrls, getChannel, formatTitle } from '../functions/music';
+
+async function handleUserInput(input: string): Promise<YouTubeVideo[]> {
+    switch (play.yt_validate(input)) {
+        case 'video':
+            const info = await play.video_basic_info(input);
+            return [info.video_details];
+        case 'search':
+            const results = await play.search(input, { source: { youtube: 'video' }, limit: 1 });
+
+            if (results.length == 0)
+                return [];
+
+            const firstResult = results[0];
+            return [firstResult];
+        case 'playlist':
+            const playlist = await play.playlist_info(input, { incomplete: true });
+            return await playlist.all_videos();
+        default:
+            return [];
+    }
+}
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,35 +40,18 @@ module.exports = {
 
         await interaction.deferReply();
         const opt = interaction.options;
-        const url = opt.getString('query');
+        const input = opt.getString('query');
 
-        let video, yt_info;
-        switch (play.yt_validate(url)) {
-            case 'video':
-                playUrls([url], channel);
-                return await interaction.editReply(`Added ${url} to queue.`);
+        const yt_videos = await handleUserInput(input);
+        const added = await playUrls(yt_videos, channel);
 
-            case 'search':
-                yt_info = await play.search(url, { source: { youtube: 'video' }, limit: 1 });
-
-                if (yt_info.length === 0)
-                    return await interaction.editReply('No results found.');
-
-                video = yt_info[0];
-                playUrls([video.url], channel);
-                return await interaction.editReply(`Added ${video.url} to queue.`);
-
-            case 'playlist':
-                const playlist = await play.playlist_info(url, { incomplete : true });
-                const videos = await playlist.all_videos();
-                const urls = videos.map((e) => e.url);
-                const result = await playUrls(urls, channel);
-                if (result)
-                    return await interaction.editReply(`Added ${urls.length} videos from the following playlist: ${playlist.title}.`);
-                else
-                    return await interaction.editReply(`Could not add playlist.`);
+        switch (added.length) {
+            case 0:
+                return await interaction.editReply('No videos were added to the queue.');
+            case 1:
+                return await interaction.editReply(`Added ${formatTitle(added[0])} to queue.`);
             default:
-                return await interaction.editReply('Not supported.');
+                return await interaction.editReply(`Added ${added.length} videos to queue.`);
         }
     },
 };

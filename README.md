@@ -1,7 +1,7 @@
 # Simple Discord Music Bot
 
 ### Why?
-I wanted to experiment with [discord.js]().
+I wanted to experiment with [discord.js](https://discord.js.org/).
 
 ### Will you add \<feature>?
 Nah, this is just a proof of concept.
@@ -22,6 +22,11 @@ Then, deploy your commands:
 npm run deploy-commands
 ```
 This will also give you a link to invite the bot to any server.
+
+Build the project:
+```
+npm run build
+```
 
 Finally, type this to start the bot:
 ```

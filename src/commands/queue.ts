@@ -1,21 +1,22 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
-import { getChannel, getQueue } from '../functions/music';
+import { formatTitle, getChannel, getQueue } from '../functions/music';
+import { YouTubeVideo } from 'play-dl';
 
 const CHARACTER_LIMIT_API = 2000;
 
-function getReply(result: string[]): string {
-    const nowPlaying = "Now playing: " + result.shift()
+function getReply(result: YouTubeVideo[]): string {
+    const nowPlaying = "Now playing: " + formatTitle(result.shift());
 
     if (!result.length) {
         return nowPlaying;
     }
 
     let reply = "Queue:"
-    let new_string = "";
     const characterLimit = CHARACTER_LIMIT_API - nowPlaying.length - 6; // 4 chars for "\n...", 2 chars for "\n\n"
 
     for (let r in result) {
-        new_string = "\n" + (r + 1) + ". <" + result[r] + ">";
+        const video = result[r];
+        const new_string = `\n${r + 1}. ${formatTitle(video)}`;
         if (reply.length + new_string.length > characterLimit) {
             reply += "\n...";
             break;
