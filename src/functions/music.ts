@@ -23,10 +23,11 @@ export async function playUrls(videos: YouTubeVideo[], channel: VoiceBasedChanne
         console.log('Channel error:', channel);
         return;
     }
-
+    if (videos.length == 0) return [];
     q.connection = getChannelConnection(channel);
     return await q.addArray(videos);
 }
+
 /* Only useful for radio
 export async function playStream(url: string, channel: VoiceBasedChannel) {
     if (!channel) {

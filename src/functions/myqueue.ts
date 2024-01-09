@@ -1,9 +1,14 @@
-import { createAudioResource, createAudioPlayer, NoSubscriberBehavior, AudioPlayerStatus, VoiceConnection, AudioPlayer } from '@discordjs/voice';
+import { createAudioResource, createAudioPlayer, NoSubscriberBehavior, AudioPlayerStatus, VoiceConnection, AudioPlayer, AudioResource } from '@discordjs/voice';
 import play, { YouTubeVideo } from 'play-dl';
 
-async function resourceFromYTUrl(url: string) {
-    const stream = await play.stream(url);
-    return createAudioResource(stream.stream, { inputType: stream.type })
+async function resourceFromYTUrl(url: string): Promise<AudioResource<null>> {
+    try {
+        const stream = await play.stream(url);
+        return createAudioResource(stream.stream, { inputType: stream.type })
+    } catch (error) {
+        return null;
+    }
+    
 }
 
 export default class MyQueue {
@@ -39,10 +44,14 @@ export default class MyQueue {
         this.#queue = Array<YouTubeVideo>();
     }
 
-    stop() {
+    stop(): boolean {
         this.clear();
         this.#nowPlaying = null;
-        if (this.player) return this.player.stop();
+        if (this.player) {
+            const p = this.player.stop();
+            const c = this.connection.disconnect();
+            return p && c;
+        }
         return false;
     }
 
@@ -51,6 +60,9 @@ export default class MyQueue {
             return this.stop();
         this.#nowPlaying = this.#queue.shift();
         const resource = await resourceFromYTUrl(this.#nowPlaying.url);
+        if (!resource) {
+            return await this.next();
+        }
         this.player.play(resource);
         this.connection.subscribe(this.player);
     }

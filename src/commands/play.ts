@@ -3,23 +3,23 @@ import play, { YouTubeVideo } from 'play-dl';
 import { playUrls, getChannel, formatTitle } from '../functions/music';
 
 async function handleUserInput(input: string): Promise<YouTubeVideo[]> {
-    switch (play.yt_validate(input)) {
-        case 'video':
-            const info = await play.video_basic_info(input);
-            return [info.video_details];
-        case 'search':
-            const results = await play.search(input, { source: { youtube: 'video' }, limit: 1 });
-
-            if (results.length == 0)
+    try {
+        switch (play.yt_validate(input)) {
+            case 'video':
+                const info = await play.video_basic_info(input);
+                return [info.video_details];
+            case 'playlist':
+                const playlist = await play.playlist_info(input, { incomplete: true });
+                return await playlist.all_videos();
+            case 'search':
+                const results = await play.search(input, { source: { youtube: 'video' }, limit: 1 });
+                if (results.length > 0) return [results[0]];
+            default:
                 return [];
-
-            const firstResult = results[0];
-            return [firstResult];
-        case 'playlist':
-            const playlist = await play.playlist_info(input, { incomplete: true });
-            return await playlist.all_videos();
-        default:
-            return [];
+        }
+    } catch (error) {
+        console.error(error);
+        return [];
     }
 }
 
@@ -41,7 +41,6 @@ module.exports = {
         await interaction.deferReply();
         const opt = interaction.options;
         const input = opt.getString('query');
-
         const yt_videos = await handleUserInput(input);
         const added = await playUrls(yt_videos, channel);
 

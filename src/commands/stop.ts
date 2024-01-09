@@ -4,7 +4,7 @@ import { getChannel, stopMusic } from '../functions/music';
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('stop')
-        .setDescription('Stop the music.'),
+        .setDescription('Stop the music and leaves the voice channel.'),
 
     async execute(interaction: ChatInputCommandInteraction) {
         const channel = await getChannel(interaction);
