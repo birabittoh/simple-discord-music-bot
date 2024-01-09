@@ -9,7 +9,7 @@ if (!(applicationId && token))
     throw 'Check your config.json!';
 
 const commands = new Array();
-const commandsPath = path.join(process.cwd(), 'commands');
+const commandsPath = path.join(process.cwd(), 'build', 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {

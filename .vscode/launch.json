@@ -20,7 +20,7 @@
         },
         {
             "name": "Deploy commands",
-            "program": "${workspaceFolder}/build/tools/deploy-commands.js",
+            "program": "${workspaceFolder}/tools/deploy-commands.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"
@@ -29,7 +29,7 @@
         },
         {
             "name": "Delete commands",
-            "program": "${workspaceFolder}/build/tools/delete-commands.js",
+            "program": "${workspaceFolder}/tools/delete-commands.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"

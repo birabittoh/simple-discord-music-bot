@@ -17,16 +17,16 @@ npm i
 
 While that happens, create your own application in the [Discord Developer Portal](https://discord.com/developers/applications). In the "Bot" tab, click on "Add Bot", then generate a new token. Now you can copy `config.example.json` into `config.json` and fill it with your Application ID and Discord Bot Token.
 
+Build the project:
+```
+npm run build
+```
+
 Then, deploy your commands:
 ```
 npm run deploy-commands
 ```
 This will also give you a link to invite the bot to any server.
-
-Build the project:
-```
-npm run build
-```
 
 Finally, type this to start the bot:
 ```
