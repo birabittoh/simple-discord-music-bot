@@ -1,9 +1,10 @@
-import { createAudioResource, joinVoiceChannel, AudioPlayerStatus, CreateAudioResourceOptions, StreamType } from '@discordjs/voice';
+import { createAudioResource, joinVoiceChannel, StreamType } from '@discordjs/voice';
+import { ChatInputCommandInteraction, GuildMember, VoiceBasedChannel } from 'discord.js'
 import MyQueue from './myqueue';
 
 const q = new MyQueue();
 
-export function getChannelConnection(channel) {
+export function getChannelConnection(channel: VoiceBasedChannel) {
     const guild = channel.guild;
     return joinVoiceChannel({
         channelId: channel.id,
@@ -12,17 +13,17 @@ export function getChannelConnection(channel) {
     });
 }
 
-export async function playUrls(urls, channel) {
+export async function playUrls(urls: string[], channel: VoiceBasedChannel): Promise<boolean> {
     if (!channel) {
         console.log('Channel error:', channel);
         return;
     }
 
     q.connection = getChannelConnection(channel);
-    return q.addArray(urls);
+    return await q.addArray(urls);
 }
 
-export async function playStream(url, channel) {
+export async function playStream(url: string, channel: VoiceBasedChannel) {
     if (!channel) {
         console.log('Channel error:', channel);
         return;
@@ -31,7 +32,7 @@ export async function playStream(url, channel) {
     q.add(createAudioResource(url, { inputType: StreamType.Opus }));
 }
 
-export async function playOutro(url, channel) {
+export async function playOutro(url: string, channel: VoiceBasedChannel) {
     if (!channel) {
         console.log('Channel error:', channel);
         return;
@@ -40,16 +41,16 @@ export async function playOutro(url, channel) {
     q.outro(url);
 }
 
-export async function getChannel(interaction) {
+export async function getChannel(interaction: ChatInputCommandInteraction): Promise<string | VoiceBasedChannel>{
     const member = interaction.member;
     if (!member)
         return 'Please use this in your current server.';
 
-    const channel = member.voice.channel;
-    if (!channel)
-        return 'You\'re not in a voice channel.';
+    const vc_error = 'You\'re not in a voice channel.';
 
-    return channel;
+    if (!("voice" in member)) return vc_error;
+    const channel: VoiceBasedChannel = member.voice.channel;
+    return channel ? channel : vc_error;
 }
 
 export async function stopMusic() {

@@ -1,9 +1,9 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
 import { getChannel, getQueue } from '../functions/music';
 
 const CHARACTER_LIMIT_API = 2000;
 
-function getReply(result) {
+function getReply(result: string[]): string {
     const nowPlaying = "Now playing: " + result.shift()
 
     if (!result.length) {
@@ -30,7 +30,7 @@ module.exports = {
         .setName('queue')
         .setDescription('Show current queue status.'),
 
-    async execute(interaction) {
+    async execute(interaction: ChatInputCommandInteraction) {
         const channel = await getChannel(interaction);
         if (typeof channel == 'string')
             return await interaction.reply({ content: channel, ephemeral: true });

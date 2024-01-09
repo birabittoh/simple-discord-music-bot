@@ -1,9 +1,9 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
 import { playOutro, getChannel } from '../functions/music';
 import path from 'node:path';
 const { outros } = require(path.join(process.cwd(), 'config.json'));
 
-function getOutroUrl(outro) {
+function getOutroUrl(outro: string): string {
     if (outro) return outro;
     const randomIndex = Math.floor(Math.random() * (outros.length));
     return outros[randomIndex].value;
@@ -24,7 +24,7 @@ module.exports = {
                 .setRequired(false)
                 .addChoices({ name: 'Yes', value: 'true' }, { name: 'No', value: 'false' })),
 
-    async execute(interaction) {
+    async execute(interaction: ChatInputCommandInteraction) {
         const channel = await getChannel(interaction);
         if (typeof channel == 'string')
             return await interaction.reply({ content: channel, ephemeral: true });
@@ -35,7 +35,9 @@ module.exports = {
         await playOutro(outroUrl, channel);
 
         if (kick !== 'false') {
-            setTimeout(() => interaction.member.voice.disconnect(), 20_000);
+            const member = interaction.member;
+            if ("voice" in member)
+                setTimeout(() => member.voice.disconnect(), 20_000);
             return await interaction.reply({ content: 'Prepare for takeoff!', ephemeral: true });
         }
         return await interaction.reply({ content: 'Playing outro.', ephemeral: true });

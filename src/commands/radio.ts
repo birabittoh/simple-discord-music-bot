@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
 import { playStream, getChannel } from '../functions/music';
 import path from 'node:path';
 const { radios } = require(path.join(process.cwd(), 'config.json'));
@@ -13,7 +13,7 @@ module.exports = {
                 .setRequired(false)
                 .addChoices(...radios)),
 
-    async execute(interaction) {
+    async execute(interaction: ChatInputCommandInteraction) {
         const channel = await getChannel(interaction);
         if (typeof channel == 'string')
             return await interaction.reply({ content: channel, ephemeral: true });

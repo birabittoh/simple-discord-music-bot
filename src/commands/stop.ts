@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
 import { getChannel, stopMusic } from '../functions/music';
 
 module.exports = {
@@ -6,7 +6,7 @@ module.exports = {
         .setName('stop')
         .setDescription('Stop the music.'),
 
-    async execute(interaction) {
+    async execute(interaction: ChatInputCommandInteraction) {
         const channel = await getChannel(interaction);
         if (typeof channel == 'string')
             return await interaction.reply({ content: channel, ephemeral: true });

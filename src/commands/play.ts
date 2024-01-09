@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { BaseInteraction, ChatInputCommandInteraction, CommandInteraction, SlashCommandBuilder } from 'discord.js';
 import play from 'play-dl';
 import { playUrls, getChannel } from '../functions/music';
 
@@ -12,13 +12,14 @@ module.exports = {
             .setRequired(true),
         ),
 
-    async execute(interaction) {
+    async execute(interaction: ChatInputCommandInteraction) {
         const channel = await getChannel(interaction);
         if (typeof channel == 'string')
             return await interaction.reply({ content: channel, ephemeral: true });
 
         await interaction.deferReply();
-        const url = interaction.options.getString('query');
+        const opt = interaction.options;
+        const url = opt.getString('query');
 
         let video, yt_info;
         switch (play.yt_validate(url)) {

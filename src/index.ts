@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { Client, Collection, GatewayIntentBits, ActivityType } from 'discord.js';
+import { Client, Collection, GatewayIntentBits, ActivityType, BaseInteraction } from 'discord.js';
 import { SlashCommand } from "./types";
 const { token } = require(path.join(process.cwd(), 'config.json'));
 
@@ -24,7 +24,7 @@ client.once('ready', () => {
     console.log('Bot online!');
 });
 
-client.on('interactionCreate', async interaction => {
+client.on('interactionCreate', async (interaction: BaseInteraction) => {
     if (!interaction.isChatInputCommand()) return;
     const command = client.slashCommands.get(interaction.commandName);
     if (!command) return;
