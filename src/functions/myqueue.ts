@@ -1,5 +1,15 @@
-import { createAudioResource, createAudioPlayer, NoSubscriberBehavior, AudioPlayerStatus, VoiceConnection, AudioPlayer, AudioResource } from '@discordjs/voice';
+import { createAudioResource, createAudioPlayer, NoSubscriberBehavior, AudioPlayerStatus, VoiceConnection, AudioPlayer, AudioResource, joinVoiceChannel } from '@discordjs/voice';
+import { VoiceBasedChannel } from 'discord.js';
 import play, { YouTubeVideo } from 'play-dl';
+
+export function getChannelConnection(channel: VoiceBasedChannel) {
+    const guild = channel.guild;
+    return joinVoiceChannel({
+        channelId: channel.id,
+        guildId: guild.id,
+        adapterCreator: guild.voiceAdapterCreator
+    });
+}
 
 async function resourceFromYTUrl(url: string): Promise<AudioResource<null>> {
     try {
@@ -16,7 +26,7 @@ export default class MyQueue {
     #queue: Array<YouTubeVideo>;
     connection: VoiceConnection;
     player: AudioPlayer;
-    static _instance: MyQueue;
+    
     get queue() {
         if (this.#nowPlaying)
             return [this.#nowPlaying].concat(this.#queue);
@@ -24,11 +34,6 @@ export default class MyQueue {
     }
 
     constructor() {
-        if (MyQueue._instance) {
-            return MyQueue._instance
-        }
-        MyQueue._instance = this;
-
         this.#nowPlaying = null;
         this.connection = null;
         this.#queue = Array<YouTubeVideo>();
@@ -74,11 +79,18 @@ export default class MyQueue {
         if (l == 0) this.next();
     }
 
-    async addArray(urls: YouTubeVideo[]) {
+    async addArray(videos: YouTubeVideo[], channel: VoiceBasedChannel) {
+        if (!channel) {
+            console.log('Channel error:', channel);
+            return;
+        }
+        if (videos.length == 0) return [];
+        this.connection = getChannelConnection(channel);
+
         const l = this.#queue.length;
-        this.#queue.push(...urls);
+        this.#queue.push(...videos);
         if (l == 0 && this.player.state.status == AudioPlayerStatus.Idle) this.next();
-        return urls;
+        return videos;
     }
 
     pause() {
@@ -90,7 +102,13 @@ export default class MyQueue {
         this.connection.subscribe(this.player);
     }
 
-    async outro(url: string) {
+    async outro(url: string, channel: VoiceBasedChannel) {
+        if (!channel) {
+            console.log('Channel error:', channel);
+            return;
+        }
+        this.connection = getChannelConnection(channel);
+
         this.player.pause();
         const resource = await resourceFromYTUrl(url);
 

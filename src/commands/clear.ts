@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
-import * as music from '../functions/music';
+import { getChannel, queue } from '../functions/music';
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -7,11 +7,11 @@ module.exports = {
         .setDescription('Clear the queue.'),
 
     async execute(interaction: ChatInputCommandInteraction) {
-        const channel = await music.getChannel(interaction);
+        const channel = await getChannel(interaction);
         if (typeof channel == 'string')
             return await interaction.reply({ content: channel, ephemeral: true });
         
-        music.clearQueue()
+        queue.clear()
         return await interaction.reply({ content: 'Queue cleared.' });
     },
 };

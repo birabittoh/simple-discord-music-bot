@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
-import { formatTitle, getChannel, getQueue } from '../functions/music';
+import { formatTitle, getChannel, queue } from '../functions/music';
 import { YouTubeVideo } from 'play-dl';
 
 const CHARACTER_LIMIT_API = 2000;
@@ -36,7 +36,7 @@ module.exports = {
         if (typeof channel == 'string')
             return await interaction.reply({ content: channel, ephemeral: true });
 
-        const result = await getQueue();
+        const result = queue.queue;
         if (result) {
             const reply = getReply(result);
             return await interaction.reply({ content: reply });

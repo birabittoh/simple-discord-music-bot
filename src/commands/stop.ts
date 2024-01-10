@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
-import { getChannel, stopMusic } from '../functions/music';
+import { getChannel, queue } from '../functions/music';
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -11,7 +11,8 @@ module.exports = {
         if (typeof channel == 'string')
             return await interaction.reply({ content: channel, ephemeral: true });
         
-        if (stopMusic())
+        const r = queue.stop();
+        if (r)
             return await interaction.reply({ content: 'Stopped.', ephemeral: true });
 
         return await interaction.reply({ content: 'Error.', ephemeral: true });

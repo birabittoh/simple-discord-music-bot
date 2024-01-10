@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
-import { playOutro, getChannel } from '../functions/music';
+import { getChannel, queue } from '../functions/music';
 import path from 'node:path';
 const { outros } = require(path.join(process.cwd(), 'config.json'));
 
@@ -32,7 +32,7 @@ module.exports = {
         const outro = interaction.options.getString('which');
         const kick = interaction.options.getString('kick');
         const outroUrl = getOutroUrl(outro);
-        await playOutro(outroUrl, channel);
+        await queue.outro(outroUrl, channel);
 
         if (kick !== 'false') {
             const member = interaction.member;

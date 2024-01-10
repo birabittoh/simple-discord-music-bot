@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import play, { YouTubeVideo } from 'play-dl';
-import { playUrls, getChannel, formatTitle } from '../functions/music';
+import { getChannel, formatTitle, queue } from '../functions/music';
 
 async function handleUserInput(input: string): Promise<YouTubeVideo[]> {
     try {
@@ -42,7 +42,7 @@ module.exports = {
         const opt = interaction.options;
         const input = opt.getString('query');
         const yt_videos = await handleUserInput(input);
-        const added = await playUrls(yt_videos, channel);
+        const added = await queue.addArray(yt_videos, channel);
 
         switch (added.length) {
             case 0:
