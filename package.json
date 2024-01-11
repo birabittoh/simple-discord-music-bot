@@ -7,7 +7,8 @@
     "build": "npx tsc",
     "start": "node build/index.js",
     "deploy-commands": "node tools/deploy-commands.js",
-    "delete-commands": "node tools/delete-commands.js"
+    "delete-commands": "node tools/delete-commands.js",
+    "authorize": "node tools/authorize.js"
   },
   "author": "Marco Andronaco",
   "license": "GPL3",
