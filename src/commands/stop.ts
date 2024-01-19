@@ -14,7 +14,7 @@ module.exports = {
         const queue = getQueue(interaction.guildId);
         const r = queue.stop();
         if (r)
-            return await interaction.reply({ content: 'Stopped.', ephemeral: true });
+            return await interaction.reply({ content: 'Stopped.' });
 
         return await interaction.reply({ content: 'Error.', ephemeral: true });
     },
