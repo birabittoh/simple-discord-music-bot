@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
-import { formatTitle, getChannel, getQueue } from '../functions/music';
+import { getQueue, formatTitle } from '../functions/music';
+import { getChannel } from '../functions/voice';
 import { YouTubeVideo } from 'play-dl';
 
 const CHARACTER_LIMIT_API = 2000;

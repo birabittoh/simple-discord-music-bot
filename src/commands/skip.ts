@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
-import { getChannel, getQueue } from '../functions/music';
+import { getQueue } from '../functions/music';
+import { getChannel } from '../functions/voice';
 
 module.exports = {
     data: new SlashCommandBuilder()

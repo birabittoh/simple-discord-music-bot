@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
-import { getChannel } from '../functions/music';
+import { getChannel } from '../functions/voice';
+import { getMagazine } from '../functions/magazines';
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -14,13 +15,18 @@ module.exports = {
         const voiceChannelUsers = interaction.guild.voiceStates.cache.filter(
             (voiceState) => voiceState.channelId === channel.id
         );
+
+        const magazine = getMagazine(interaction.user.id);
+        if (!magazine.shoot())
+            return await interaction.reply({ content: `💨 Too bad... You're out of bullets.` });
+
         const members = voiceChannelUsers.map((voiceState) => voiceState.member);
-        const l = members.length
+        const l = members.length;
         const randomIndex = Math.floor(Math.random() * l);
         const toBeKicked = members[randomIndex].user.bot ? members[(randomIndex + 1) % l] : members[randomIndex];
 
         toBeKicked.voice.disconnect();
         const victimName = toBeKicked.nickname ?? toBeKicked.user.globalName;
-        return await interaction.reply({ content: `💥 Bang! **${victimName}** was shot.` });
+        return await interaction.reply({ content: `💥 Bang! **${victimName}** was shot. **${magazine.left}/${magazine.size} bullets** left in your magazine.` });
     },
 };

@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import play, { YouTubeVideo } from 'play-dl';
-import { getChannel, formatTitle, getQueue } from '../functions/music';
+import { getQueue, formatTitle } from '../functions/music';
+import { getChannel } from '../functions/voice';
 
 async function handleUserInput(input: string): Promise<YouTubeVideo[]> {
     try {
