@@ -15,10 +15,12 @@ module.exports = {
             (voiceState) => voiceState.channelId === channel.id
         );
         const members = voiceChannelUsers.map((voiceState) => voiceState.member);
-        const randomIndex = Math.floor(Math.random() * members.length);
-        const toBeKicked = members[randomIndex];
-        toBeKicked.voice.disconnect();
+        const l = members.length
+        const randomIndex = Math.floor(Math.random() * l);
+        const toBeKicked = members[randomIndex].user.bot ? members[(randomIndex + 1) % l] : members[randomIndex];
 
-        return await interaction.reply({ content: `💥 Bang! **${toBeKicked.user.globalName}** was shot.` });
+        toBeKicked.voice.disconnect();
+        const victimName = toBeKicked.nickname ?? toBeKicked.user.globalName;
+        return await interaction.reply({ content: `💥 Bang! **${victimName}** was shot.` });
     },
 };
