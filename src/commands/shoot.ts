@@ -1,6 +1,8 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, GuildMember, APIInteractionGuildMember } from 'discord.js';
 import { getChannel } from '../functions/voice';
 import { getMagazine } from '../functions/magazines';
+
+const bustProbability = 0.5;
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,14 +21,22 @@ module.exports = {
         const magazine = getMagazine(interaction.user.id);
         if (!magazine.shoot())
             return await interaction.reply({ content: `💨 Too bad... You're out of bullets.` });
+        
+        const allMembers = voiceChannelUsers.map((voiceState) => voiceState.member);
+        const killerId = interaction.user.id
 
-        const members = voiceChannelUsers.map((voiceState) => voiceState.member);
-        const l = members.length;
-        const randomIndex = Math.floor(Math.random() * l);
-        const toBeKicked = members[randomIndex].user.bot ? members[(randomIndex + 1) % l] : members[randomIndex];
+        let toBeKicked: GuildMember;
+        if (Math.random() >= bustProbability) {
+            toBeKicked = allMembers.find((e) => e.user.id === killerId);
+        } else {
+            const members = allMembers.filter((m) => !m.user.bot && m.user.id != killerId);
+            const l = members.length;
+            const randomIndex = Math.floor(Math.random() * l);
+            toBeKicked = members[randomIndex].user.bot ? members[(randomIndex + 1) % l] : members[randomIndex];
+        }
 
         toBeKicked.voice.disconnect();
-        const victimName = toBeKicked.nickname ?? toBeKicked.user.globalName;
+        const victimName = toBeKicked.nickname ?? toBeKicked.user.globalName ?? toBeKicked.user.tag;
         return await interaction.reply({ content: `💥 Bang! **${victimName}** was shot. **${magazine.left}/${magazine.size} bullets** left in your magazine.` });
     },
 };
